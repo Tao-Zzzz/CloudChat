@@ -1,4 +1,6 @@
 #include "StatusGrpcClient.h"
+#include "Defer.h"
+#include "ConfigMgr.h"
 
 GetChatServerRsp StatusGrpcClient::GetChatServer(int uid)
 {
@@ -6,12 +8,15 @@ GetChatServerRsp StatusGrpcClient::GetChatServer(int uid)
 	GetChatServerRsp reply;
 	GetChatServerReq request;
 	request.set_uid(uid);
+	// 从连接池中取链接
 	auto stub = pool_->getConnection();
+	// 由proto生成的函数服务
 	Status status = stub->GetChatServer(&context, request, &reply);
+	
 	Defer defer([&stub, this]() {
 		pool_->returnConnection(std::move(stub));
 		});
-	if (status.ok()) {	
+	if (status.ok()) {
 		return reply;
 	}
 	else {

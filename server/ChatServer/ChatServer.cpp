@@ -44,14 +44,24 @@ int main()
 
 		boost::asio::io_context  io_context;
 		boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
+
+
 		signals.async_wait([&io_context, pool, &server](auto, auto) {
 			io_context.stop();
 			pool->Stop();
 			server->Shutdown();
 			});
-		auto port_str = cfg["SelfServer"]["Port"];
-		CServer s(io_context, atoi(port_str.c_str()));
+		
+
+		std::string gate_prot_str = cfg["SelfServer"]["Port"];
+		short gate_port = atoi(gate_prot_str.c_str());
+		std::cout << " gate_port: " << gate_port << std::endl;
+
+		CServer s(io_context, gate_port);
+
+
 		io_context.run();
+
 		RedisMgr::GetInstance()->HDel(LOGIN_COUNT, server_name);
 		RedisMgr::GetInstance()->Close();
 		grpc_server_thread.join();

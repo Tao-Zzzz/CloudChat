@@ -1,3 +1,4 @@
+
 #include "StatusServiceImpl.h"
 #include "ConfigMgr.h"
 #include "const.h"
@@ -5,18 +6,20 @@
 #include <climits>
 
 std::string generate_unique_string() {
+	//std::cout << "generate uuid" << std::endl;
 	// 创建UUID对象
 	boost::uuids::uuid uuid = boost::uuids::random_generator()();
 
 	// 将UUID转换为字符串
 	std::string unique_string = to_string(uuid);
 
+	//std::cout << "generate uuid completed" << std::endl;
 	return unique_string;
 }
 
 Status StatusServiceImpl::GetChatServer(ServerContext* context, const GetChatServerReq* request, GetChatServerRsp* reply)
 {
-	std::string prefix("llfc status server has received :  ");
+	std::string prefix("hy status server has received :  ");
 	const auto& server = getChatServer();
 	reply->set_host(server.host);
 	reply->set_port(server.port);
@@ -28,6 +31,7 @@ Status StatusServiceImpl::GetChatServer(ServerContext* context, const GetChatSer
 
 StatusServiceImpl::StatusServiceImpl()
 {
+	//std::cout << "construct Status Service" << std::endl;
 	auto& cfg = ConfigMgr::Inst();
 	auto server_list = cfg["chatservers"]["Name"];
 
@@ -52,12 +56,16 @@ StatusServiceImpl::StatusServiceImpl()
 		_servers[server.name] = server;
 	}
 
+	//std::cout << "construct Status Service over" << std::endl;
 }
 
 ChatServer StatusServiceImpl::getChatServer() {
+	//std::cout << "get ChatServer" << std::endl;
 	std::lock_guard<std::mutex> guard(_server_mtx);
 	auto minServer = _servers.begin()->second;
+	//std::cout << "get ChatServer step 1" << std::endl;
 	auto count_str = RedisMgr::GetInstance()->HGet(LOGIN_COUNT, minServer.name);
+	
 	if (count_str.empty()) {
 		//不存在则默认设置为最大
 		minServer.con_count = INT_MAX;
@@ -66,10 +74,11 @@ ChatServer StatusServiceImpl::getChatServer() {
 		minServer.con_count = std::stoi(count_str);
 	}
 
+	//std::cout << "get ChatServer step 2" << std::endl;
 
 	// 使用范围基于for循环
-	for ( auto& server : _servers) {
-		
+	for (auto& server : _servers) {
+
 		if (server.second.name == minServer.name) {
 			continue;
 		}
@@ -87,11 +96,13 @@ ChatServer StatusServiceImpl::getChatServer() {
 		}
 	}
 
+	std::cout << "get ChatServer over, least connected server by now is:" << minServer.name << std::endl;
 	return minServer;
 }
 
 Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request, LoginRsp* reply)
 {
+	//std::cout << "login..." << std::endl;
 	auto uid = request->uid();
 	auto token = request->token();
 
@@ -99,11 +110,11 @@ Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request,
 	std::string token_key = USERTOKENPREFIX + uid_str;
 	std::string token_value = "";
 	bool success = RedisMgr::GetInstance()->Get(token_key, token_value);
-	if (success) {
+	if (!success) {
 		reply->set_error(ErrorCodes::UidInvalid);
 		return Status::OK;
 	}
-	
+
 	if (token_value != token) {
 		reply->set_error(ErrorCodes::TokenInvalid);
 		return Status::OK;
@@ -116,8 +127,11 @@ Status StatusServiceImpl::Login(ServerContext* context, const LoginReq* request,
 
 void StatusServiceImpl::insertToken(int uid, std::string token)
 {
+	//std::cout << "insertToken..." << std::endl;
 	std::string uid_str = std::to_string(uid);
 	std::string token_key = USERTOKENPREFIX + uid_str;
 	RedisMgr::GetInstance()->Set(token_key, token);
+	//std::cout << "insertToken over" << std::endl;
+
 }
 
