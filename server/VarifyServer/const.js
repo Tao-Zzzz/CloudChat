@@ -6,5 +6,4 @@ const Errors = {
     Exception : 2,
 };
 
-
-module.exports = {code_prefix,Errors}
+module.exports = {code_prefix, Errors}

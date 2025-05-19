@@ -1,7 +1,12 @@
+
+
 #pragma once
 #include <grpcpp/grpcpp.h>
 #include "message.grpc.pb.h"
 #include <mutex>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -15,8 +20,8 @@ using message::StatusService;
 
 class  ChatServer {
 public:
-	ChatServer():host(""),port(""),name(""),con_count(0){}
-	ChatServer(const ChatServer& cs):host(cs.host), port(cs.port), name(cs.name), con_count(cs.con_count){}
+	ChatServer() :host(""), port(""), name(""), con_count(0) {}
+	ChatServer(const ChatServer& cs) :host(cs.host), port(cs.port), name(cs.name), con_count(cs.con_count) {}
 	ChatServer& operator=(const ChatServer& cs) {
 		if (&cs == this) {
 			return *this;

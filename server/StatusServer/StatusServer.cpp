@@ -1,7 +1,4 @@
-﻿// StatusServer.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
-
-#include <iostream>
+﻿#include <iostream>
 #include <json/json.h>
 #include <json/value.h>
 #include <json/reader.h>
@@ -10,17 +7,18 @@
 #include "hiredis.h"
 #include "RedisMgr.h"
 #include "MysqlMgr.h"
-#include "AsioIOServicePool.h"
+#include "AsioIOContextPool.h"
 #include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
 #include <boost/asio.hpp>
 #include "StatusServiceImpl.h"
+
 void RunServer() {
-	auto & cfg = ConfigMgr::Inst();
-	
-	std::string server_address(cfg["StatusServer"]["Host"]+":"+ cfg["StatusServer"]["Port"]);
+	auto& cfg = ConfigMgr::Inst();
+
+	std::string server_address(cfg["StatusServer"]["Host"] + ":" + cfg["StatusServer"]["Port"]);
 	StatusServiceImpl service;
 
 	grpc::ServerBuilder builder;
@@ -47,6 +45,7 @@ void RunServer() {
 		});
 
 	// 在单独的线程中运行io_context
+	// 启动一个线程自动和主线程分离，跑两个线程，一个用于捕获退出信号，另一个等待连接
 	std::thread([&io_context]() { io_context.run(); }).detach();
 
 	// 等待服务器关闭

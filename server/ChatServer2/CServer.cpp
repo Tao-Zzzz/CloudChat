@@ -26,6 +26,7 @@ void CServer::HandleAccept(shared_ptr<CSession> new_session, const boost::system
 	StartAccept();
 }
 
+// 从池子里取出来一个iocontext后创建一个session与客户端连接
 void CServer::StartAccept() {
 	auto &io_context = AsioIOServicePool::GetInstance()->GetIOService();
 	shared_ptr<CSession> new_session = make_shared<CSession>(io_context, this);
