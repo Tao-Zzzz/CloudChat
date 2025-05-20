@@ -51,7 +51,7 @@ LoginDialog::~LoginDialog()
 void LoginDialog::initHead()
 {
     // 加载图片
-    QPixmap originalPixmap(":/res/head_1.jpg");
+    QPixmap originalPixmap(":/res/ice.png");
       // 设置图片自动缩放
     qDebug()<< originalPixmap.size() << ui->head_label->size();
     originalPixmap = originalPixmap.scaled(ui->head_label->size(),
