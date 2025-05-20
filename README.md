@@ -31,6 +31,8 @@
 ![](attachment/e5b5f50df0fcf807d9a475e8d9bdd321.png)
 
 
+---
+
 **下面是一些制作笔记, 笔者表达不清楚请见谅**
 # GateServer
 回顾一下这个HTTP网关是怎么做的吧：
